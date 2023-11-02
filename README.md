@@ -2,9 +2,11 @@
 A program that can intercept the barcode
 
 ## Example Usage
-
+```
 let args = {
+
     endingChar: "Enter",
+    
     callback: async function (barCodeValue, isBarCode) {
         if (isBarCode) {
             console.log(`Valid barCode: ${barCodeValue}`);
@@ -16,3 +18,4 @@ let args = {
 };
 
 barCode(args);
+```
