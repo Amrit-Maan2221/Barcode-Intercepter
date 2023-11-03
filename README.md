@@ -3,7 +3,7 @@ A program that can intercept the barcode
 
 ## Example Usage
 ```
-let barcodeIntercepter = {
+barcodeIntercepter({
 
     endingChar: "Enter",
     
@@ -15,7 +15,5 @@ let barcodeIntercepter = {
         }
     },
     minimumCharLength: 4
-};
-
-barCode(args);
+});
 ```
