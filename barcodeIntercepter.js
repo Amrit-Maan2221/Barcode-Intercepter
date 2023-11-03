@@ -6,7 +6,7 @@
  * @param {Function} [args.callback] - A optional callback function to execute when a valid barcode is detected.
  * @param {number} [args.minimumCharLength=8] - The expected minimum length of the barcode (default is 8).
  */
-function barCode(args) {
+function barcodeIntercepter(args) {
     if (args == undefined) {
         throw new Error(`Missing argument (args) in function - barCode`);
     }
@@ -62,22 +62,19 @@ function barCode(args) {
         toggleScannerDiv = document.createElement('div');
         toggleScannerDiv.id = toggleScannerDivId;
         toggleScannerDiv.style.position = 'fixed';
-        toggleScannerDiv.style.bottom = '0px';
+        toggleScannerDiv.style.bottom = '50vh';
         toggleScannerDiv.style.right = '0px';
         toggleScannerDiv.style.zIndex = '99';
         toggleScannerDiv.style.cursor = 'pointer';
-        toggleScannerDiv.style.borderTop = '1px solid black';
-        toggleScannerDiv.style.borderLeft = '1px solid black';
-        toggleScannerDiv.style.padding = '2px';
         toggleScannerDiv.style.display = 'none';
 
         toggleScannerBtn = document.createElement('button');
         toggleScannerBtn.id = toggleScannerBtnId;
+        toggleScannerBtn.className = 'btn-info';
         toggleScannerBtn.style.padding = '4px';
-        toggleScannerBtn.style.fontSize = '12px';
-        toggleScannerBtn.style.backgroundColor = '#009efb';
-        toggleScannerBtn.style.border = '0px';
-        toggleScannerBtn.textContent = 'Turn On Scanner';
+        toggleScannerBtn.style.fontSize = '16px';
+        toggleScannerBtn.style.border = '0.1px solid black';
+        toggleScannerBtn.textContent = 'Scanner Off';
 
         toggleScannerDiv.appendChild(toggleScannerBtn);
         document.body.appendChild(toggleScannerDiv);
@@ -114,9 +111,9 @@ function barCode(args) {
     function updateToggleBtnText() {
         // Updates the button text according to the current scanner state
         if (onInputScanEnabled) {
-            toggleScannerBtn.textContent = 'Turn Off Scanner'; // Displays 'Turn Off Scanner' if the scanner is on
+            toggleScannerBtn.textContent = 'Scanner On'; // Displays 'Scanner On' if the scanner is on
         } else {
-            toggleScannerBtn.textContent = 'Turn On Scanner'; // Displays 'Turn On Scanner' if the scanner is off
+            toggleScannerBtn.textContent = 'Scanner Off'; // Displays 'Scanner Off' if the scanner is off
         }
     }
 
@@ -192,8 +189,10 @@ function barCode(args) {
      * @param {Event} event - The event object representing the keyboard input event.
      */
     function handleInput(event) {
-        if (scannerEnabled) {
-            event.preventDefault();
+        if (scannerEnabled && (event.key.length == 1 || event.key == args.endingChar)) {
+            if (!(event.key == args.endingChar && barcodeInput.length < args.minimumCharLength)) {
+                event.preventDefault();
+            }
             if (event.key == args.endingChar) {
                 if (isTypingFast() && barcodeInput.length >= args.minimumCharLength) {
                     if (args.callback != undefined && typeof args.callback == "function") {
