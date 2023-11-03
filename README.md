@@ -3,7 +3,7 @@ A program that can intercept the barcode
 
 ## Example Usage
 ```
-let args = {
+let barcodeIntercepter = {
 
     endingChar: "Enter",
     
