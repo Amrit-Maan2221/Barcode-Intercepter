@@ -44,8 +44,6 @@ barcodeIntercepter({
 
 2. **Toggle Scanner:** Users can toggle the scanner on or off by clicking the provided button.
 
-3. **Real-time Feedback:** The specified callback function is invoked when a valid barcode is detected, providing the barcode input and a boolean indicating whether fast typing was detected.
-
 ## Customization
 
 - **Ending Character:** Adjust the `endingChar` parameter to match the character signaling the end of barcodes in your application.
