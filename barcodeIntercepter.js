@@ -23,19 +23,19 @@ function barcodeIntercepter(args) {
     let keyBoardInput = '';
     let lastKeyPressTime = new Date().getTime();
     let focusedElement = document.activeElement;
+    let prevFocusElem = null;
     let scannerEnabled = false;
     const toggleScannerDivId = "BM-toggleScanner";
     const toggleScannerBtnId = "toggleScannerBtnId";
-    let onInputScanEnabled = false;
     let typingThreshold = 15; // Threshold time in milliseconds to determine fast typing
     let toggleScannerDiv;
     let toggleScannerBtn;
     appendToogleBtn();
     toggleScanner();
 
-    document.addEventListener('focusin', handleFocus);
-    document.addEventListener('click', handleFocus);
-    document.addEventListener('keyup', handleFocus);
+    document.addEventListener('focusin', handleWindowFocus);
+    document.addEventListener('click', handleWindowFocus);
+    document.addEventListener('keyup', handleWindowFocus);
     
     handleIFrames();
 
@@ -49,7 +49,7 @@ function barcodeIntercepter(args) {
      */
     function isEditable() {
         return (focusedElement && !focusedElement.readOnly && !focusedElement.disabled &&
-            ((focusedElement.tagName === 'INPUT' && focusedElement.type !== 'hidden') || focusedElement.tagName === 'SELECT' ||
+            (focusedElement.tagName === 'INPUT' || focusedElement.tagName === 'SELECT' ||
                 focusedElement.tagName === 'TEXTAREA' || (focusedElement.isContentEditable)));
     }
 
@@ -62,26 +62,35 @@ function barcodeIntercepter(args) {
         toggleScannerDiv = document.createElement('div');
         toggleScannerDiv.id = toggleScannerDivId;
         toggleScannerDiv.style.position = 'fixed';
-        toggleScannerDiv.style.bottom = '50vh';
-        toggleScannerDiv.style.right = '0px';
-        toggleScannerDiv.style.zIndex = '99';
+        toggleScannerDiv.style.top = '0px';
+        toggleScannerDiv.style.left = 'calc(50vw - 18px)';
+        toggleScannerDiv.style.zIndex = '1000000';
         toggleScannerDiv.style.cursor = 'pointer';
         toggleScannerDiv.style.display = 'none';
+        toggleScannerDiv.style.borderBottomLeftRadius = '5px';
+        toggleScannerDiv.style.borderBottomRightRadius = '5px';
+        toggleScannerDiv.style.background = 'var(--danger)';
+        toggleScannerDiv.classList.add('animate', 'animate__bounceIn');
+        toggleScannerDiv.tabIndex = -1;
 
         toggleScannerBtn = document.createElement('button');
         toggleScannerBtn.id = toggleScannerBtnId;
-        toggleScannerBtn.className = 'btn-info';
         toggleScannerBtn.style.padding = '4px';
-        toggleScannerBtn.style.fontSize = '16px';
-        toggleScannerBtn.style.border = '0.1px solid black';
-        toggleScannerBtn.textContent = 'Scanner Off';
+        toggleScannerBtn.style.fontSize = '12px';
+        toggleScannerBtn.style.background = 'transparent';
+        toggleScannerBtn.style.border = '0px';
+        toggleScannerBtn.textContent = 'Scanner Intercepter Off';
+        toggleScannerBtn.style.color = 'white';
+        toggleScannerBtn.style.outline = '0px';
+        toggleScannerBtn.tabIndex = -1;
 
         toggleScannerDiv.appendChild(toggleScannerBtn);
         document.body.appendChild(toggleScannerDiv);
 
         toggleScannerBtn.addEventListener('click', (event) => {
             event.preventDefault();
-            onInputScanEnabled = !onInputScanEnabled;
+            scannerEnabled = !scannerEnabled;
+            focusedElement.focus();
             updateToggleBtnText()
         });
     }
@@ -91,15 +100,13 @@ function barcodeIntercepter(args) {
      * Handles the visibility of toggle scanner button and activation of the scanner according to the focused element and its editability.
      */
     function toggleScanner() {
-        if (!(focusedElement.id == toggleScannerDivId || focusedElement.id == toggleScannerBtnId)) {
-            if (isEditable()) {
-                scannerEnabled = onInputScanEnabled;
-                toggleScannerDiv.style.display = "inline-block";
-                updateToggleBtnText();
-            } else {
-                scannerEnabled = true;
-                toggleScannerDiv.style.display = "none";
-            }
+        if (isEditable()) {
+            scannerEnabled = false;
+            toggleScannerDiv.style.display = "inline-block";
+            updateToggleBtnText();
+        } else {
+            scannerEnabled = true;
+            toggleScannerDiv.style.display = "none";
         }
     }
 
@@ -110,10 +117,10 @@ function barcodeIntercepter(args) {
      */
     function updateToggleBtnText() {
         // Updates the button text according to the current scanner state
-        if (onInputScanEnabled) {
-            toggleScannerBtn.textContent = 'Scanner On'; // Displays 'Scanner On' if the scanner is on
+        if (scannerEnabled) {
+            toggleScannerBtn.textContent = 'Scanner Intercepter On'; // Displays 'Scanner On' if the scanner is on
         } else {
-            toggleScannerBtn.textContent = 'Scanner Off'; // Displays 'Scanner Off' if the scanner is off
+            toggleScannerBtn.textContent = 'Scanner Intercepter Off'; // Displays 'Scanner Off' if the scanner is off
         }
     }
 
@@ -124,13 +131,22 @@ function barcodeIntercepter(args) {
      * 
      * @param {Event} event - The event object containing information about the focus change.
      */
-    function handleFocus(event) {
-        focusedElement = document.activeElement; // Updates the focused element based on the active element
-        toggleScanner(); // Adjusts the scanner state based on the current focused element
+    function handleWindowFocus(event) {
+        handleFocus(document.activeElement);
     }
 
 
 
+
+    function handleFocus(newActiveElement) {
+        if (!(newActiveElement.id == toggleScannerDivId || newActiveElement.id == toggleScannerBtnId) && focusedElement != newActiveElement && newActiveElement.tagName != 'IFRAME') {
+            prevFocusElem = focusedElement;
+            focusedElement = newActiveElement;
+            toggleScanner();
+        }
+    }
+
+    
 
 
     /**
@@ -149,11 +165,14 @@ function barcodeIntercepter(args) {
         function handleIframeEvents(iframeId) {
             var iframe = document.getElementById(iframeId);
             if (iframe && iframe.contentWindow) {
-                ['focusin', 'click', 'keyup'].forEach(eventType => {
-                    iframe.contentWindow.addEventListener(eventType, event => handleIframeFocus(iframe));
-                });
+                iframe.onload = () => {
+                    ['focusin', 'click', 'keyup'].forEach(eventType => {
+                        iframe.contentWindow.addEventListener(eventType, event => handleIframeFocus(iframe));
+                    });
+                    iframe.contentWindow.addEventListener("keydown", handleInput);
+                }
             }
-        }
+        }       
 
         /**
          * Handles focus changes within iframes, updating the focused element and adjusting the scanner state.
@@ -161,8 +180,9 @@ function barcodeIntercepter(args) {
          * @param {HTMLIFrameElement} iframe - The iframe element to be handled for focus changes.
          */
         function handleIframeFocus(iframe) {
-            focusedElement = iframe.contentWindow.document.activeElement; // Updates the focused element within the iframe
-            toggleScanner(); // Adjusts the scanner state based on the focused element within the iframe
+            setTimeout(() => {
+                handleFocus(iframe.contentWindow.document.activeElement);
+            }, 100)
         }
     }
 
