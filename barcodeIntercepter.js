@@ -49,8 +49,17 @@ function barcodeIntercepter(args) {
      */
     function isEditable() {
         return (focusedElement && !focusedElement.readOnly && !focusedElement.disabled &&
-            (focusedElement.tagName === 'INPUT' || focusedElement.tagName === 'SELECT' ||
-                focusedElement.tagName === 'TEXTAREA' || (focusedElement.isContentEditable)));
+            (focusedElement.tagName === 'INPUT' && isEditableInputTypes(focusedElement.type)) || focusedElement.tagName === 'SELECT' ||
+                focusedElement.tagName === 'TEXTAREA' || (focusedElement.isContentEditable));
+    }
+
+
+    function isEditableInputTypes(type) {
+        if (type == 'text' || type == 'search' || type == 'email' || type == "number" || type == "password" || type == "tel" || type == "url" || type == "time" || type == "week" || type == "month") {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
