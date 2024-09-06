@@ -1,12 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script>
-
-
         /**
  * Detects whether the scanned input is a valid Barcode.
  * 
@@ -362,22 +353,3 @@ function barcodeIntercepter(args) {
         }
     }
 }
-    </script>
-</head>
-<body>
-    <script>
-        let args = {
-    endingChar: "Enter",
-    callback: async function (barCodeValue, isBarCode) {
-        if (isBarCode) {
-            console.log("test")
-        } else {
-            console.log(`Invalid barCode: ${barCodeValue}`);
-        }
-    },
-    minimumCharLength: 4
-};
-barcodeIntercepter(args);
-    </script>
-</body>
-</html>
